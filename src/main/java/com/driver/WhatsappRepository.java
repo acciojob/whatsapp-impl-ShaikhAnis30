@@ -53,7 +53,7 @@ public class WhatsappRepository {
 //    }
 
 
-    public String createUser(String name, String mobNo) throws Exception {
+    public String createUser(String name, String mobNo) {
         userMap.put(mobNo, new User(name, mobNo));
         return "SUCCESS";
     }
