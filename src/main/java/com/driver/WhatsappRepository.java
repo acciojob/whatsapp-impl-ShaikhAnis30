@@ -36,10 +36,10 @@ public class WhatsappRepository {
 
     }
 
-    public boolean checkNewUser(String mobNo) {
-        if(userMap.containsKey(mobNo)) return true;
-        return false;
-    }
+//    public boolean checkNewUser(String mobNo) {
+//        if(userMap.containsKey(mobNo)) return true;
+//        return false;
+//    }
 
     // create a user
 //     @PostMapping
@@ -53,10 +53,10 @@ public class WhatsappRepository {
 //    }
 
 
-    public String createUser(String name, String mobNo) throws Exception {
-        userMap.put(mobNo, new User(name, mobNo));
-        return "SUCCESS";
-    }
+//    public String createUser(String name, String mobNo) throws Exception {
+//        userMap.put(mobNo, new User(name, mobNo));
+//        return "SUCCESS";
+//    }
 
    // find admin -- no need we have adminMap
 //    public boolean findAdmin(List<User> users, User user) {
@@ -67,82 +67,142 @@ public class WhatsappRepository {
 //    }
 
 
-
-
-
-
     // create a group
-    public Group createGroup(List<User> users) {
-        if(users.size() == 2) {
-            return this.personalChatGroup(users);
-        }
-
-        this.customGroupCount++;
-        // If there are 2 or more users, the name of the group will be "Group count".
-        Group group = new Group("Group " + this.customGroupCount, users.size());
-        groupUserMap.put(group, users);
-        adminMap.put(group, users.get(0));
-        return group;
-    }
-
-
-    // creation of personalChat
-    public Group personalChatGroup(List<User> users) {
-        Group personalChat = new Group(users.get(1).getName(), 2);
-        groupUserMap.put(personalChat, users); // personal chat is also a group, hence putted into dataBase
-        return personalChat;
-    }
-
-
-    // create a message
-    public int createMessage(String messageContent) {
-        this.messageId++;
-        Message message = new Message(messageId, messageContent, new Date());
-        return this.messageId; // from which id message was created
-    }
+//    public Group createGroup(List<User> users) {
+//        if(users.size() == 2) {
+//            return this.personalChatGroup(users);
+//        }
+//
+//        this.customGroupCount++;
+//        // If there are 2 or more users, the name of the group will be "Group count".
+//        Group group = new Group("Group " + this.customGroupCount, users.size());
+//        groupUserMap.put(group, users);
+//        adminMap.put(group, users.get(0));
+//        return group;
+//    }
+//
+//
+//    // creation of personalChat
+//    public Group personalChatGroup(List<User> users) {
+//        Group personalChat = new Group(users.get(1).getName(), 2);
+//        groupUserMap.put(personalChat, users); // personal chat is also a group, hence putted into dataBase
+//        return personalChat;
+//    }
+//
+//
+//    // create a message
+//    public int createMessage(String messageContent) {
+//        this.messageId++;
+//        Message message = new Message(messageId, messageContent, new Date());
+//        return this.messageId; // from which id message was created
+//    }
 
 
 
     // Send a message by providing the message, sender, and group.
     // means i have to send message in some group
-    public int sendMessage(Message message, User sender, Group group) throws Exception{
-        if(!groupUserMap.containsKey(group)) throw new Exception("Group does not exist");
-
-        if(!this.checkSender(group, sender)) throw new Exception("You are not allowed to send message");
-
-        List<Message> messageList = new ArrayList<>();
-        if(groupMessageMap.containsKey(group)) messageList = groupMessageMap.get(group);
-
-        messageList.add(message);
-        groupMessageMap.put(group, messageList);  // also updated in DB
-
-//        int messageListSize = groupMessageMap.get(group).size();
-
-         return messageList.size();
-//        return messageListSize;
-    }
+//    public int sendMessage(Message message, User sender, Group group) throws Exception{
+//        if(!groupUserMap.containsKey(group)) throw new Exception("Group does not exist");
+//
+//        if(!this.checkSender(group, sender)) throw new Exception("You are not allowed to send message");
+//
+//        List<Message> messageList = new ArrayList<>();
+//        if(groupMessageMap.containsKey(group)) messageList = groupMessageMap.get(group);
+//
+//        messageList.add(message);
+//        groupMessageMap.put(group, messageList);  // also updated in DB
+//
+////        int messageListSize = groupMessageMap.get(group).size();
+//
+//         return messageList.size();
+////        return messageListSize;
+//    }
 
 
     // check if sender is present in group or not
-    public boolean checkSender(Group group, User sender) {
-        List<User> userList = groupUserMap.get(group);
-        for (User user : userList) {
-            if(user.equals(sender))
-                return true;
-        }
-        return false;
-    }
+//    public boolean checkSender(Group group, User sender) {
+//        List<User> userList = groupUserMap.get(group);
+//        for (User user : userList) {
+//            if(user.equals(sender))
+//                return true;
+//        }
+//        return false;
+//    }
 
 
     // change admin
-    public String changeAdmin(User approver, User user, Group group) throws Exception {
+//    public String changeAdmin(User approver, User user, Group group) throws Exception {
+//        if(!groupUserMap.containsKey(group)) throw new Exception("Group does not exist");
+//
+//        if(!adminMap.get(group).equals(approver)) throw new Exception("Approver does not have rights");
+//
+//        if(!this.checkSender(group, user)) throw new Exception("User is not a participant");
+//
+//        adminMap.put(group, user);
+//        return "SUCCESS";
+//    }
+
+
+    public boolean checkNewUser(String mobile) {
+        if(userMap.containsKey(mobile)) return false;
+        return true;
+    }
+
+    public void createUser(String name, String mobile) {
+        userMap.put(mobile, new User(name, mobile));
+    }
+
+    public String changeAdmin(User approver, User user, Group group) throws Exception{
         if(!groupUserMap.containsKey(group)) throw new Exception("Group does not exist");
-
         if(!adminMap.get(group).equals(approver)) throw new Exception("Approver does not have rights");
-
-        if(!this.checkSender(group, user)) throw new Exception("User is not a participant");
+        if(!this.userExistsInGroup(group, user)) throw  new Exception("User is not a participant");
 
         adminMap.put(group, user);
         return "SUCCESS";
+    }
+
+    public Group createGroup(List<User> users) {
+        if(users.size() == 2) return this.createPersonalChat(users);
+
+        this.customGroupCount++;
+        String groupName = "Group " + this.customGroupCount;
+        Group group = new Group(groupName, users.size());
+        groupUserMap.put(group, users);
+        adminMap.put(group, users.get(0));
+        return group;
+    }
+
+    public Group createPersonalChat(List<User> users) {
+        String groupName = users.get(1).getName();
+        Group personalGroup = new Group(groupName, 2);
+        groupUserMap.put(personalGroup, users);
+        return personalGroup;
+    }
+
+    public int createMessage(String content){
+        this.messageId++;
+        Message message = new Message(messageId, content, new Date());
+        return this.messageId;
+    }
+
+    public int sendMessage(Message message, User sender, Group group) throws Exception{
+        if(!groupUserMap.containsKey(group)) throw new Exception("Group does not exist");
+        if(!this.userExistsInGroup(group, sender)) throw  new Exception("You are not allowed to send message");
+
+        List<Message> messages = new ArrayList<>();
+        if(groupMessageMap.containsKey(group)) messages = groupMessageMap.get(group);
+
+        messages.add(message);
+        groupMessageMap.put(group, messages);
+        return messages.size();
+    }
+
+    public boolean userExistsInGroup(Group group, User sender) {
+        List<User> users = groupUserMap.get(group);
+        for(User user: users) {
+            if(user.equals(sender)) return true;
+        }
+
+        return false;
     }
 }

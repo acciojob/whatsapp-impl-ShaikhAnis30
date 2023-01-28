@@ -15,10 +15,10 @@ public class WhatsappService {
         return whatsappRepository.checkNewUser(mobNo);
     }
 
-    public String createUser(String name, String mobNo) throws Exception {
-        return whatsappRepository.createUser(name, mobNo);
+    public String createUser(String name, String mobNo) {
+        whatsappRepository.createUser(name, mobNo);
+        return "SUCCESS";
     }
-
 
     public Group createGroup(List<User> user) {
         return whatsappRepository.createGroup(user);
