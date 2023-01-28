@@ -40,6 +40,7 @@ public class WhatsappRepository {
         if(userMap.containsKey(mobNo)) return true;
         return false;
     }
+
     // create a user
 //     @PostMapping
 //    public String createUser(String name, String mobNo) throws Exception {
