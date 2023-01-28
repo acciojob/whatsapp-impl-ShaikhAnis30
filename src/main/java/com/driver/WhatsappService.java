@@ -15,8 +15,7 @@ public class WhatsappService {
         return whatsappRepository.checkNewUser(mobNo);
     }
 
-
-    public String createUser(String name, String mobNo) {
+    public String createUser(String name, String mobNo) throws Exception {
         return whatsappRepository.createUser(name, mobNo);
     }
 
@@ -24,7 +23,6 @@ public class WhatsappService {
     public Group createGroup(List<User> user) {
         return whatsappRepository.createGroup(user);
     }
-
 
     public int createMessage(String messageContent){
         return whatsappRepository.createMessage(messageContent);
@@ -36,12 +34,8 @@ public class WhatsappService {
     }
 
 
-
     public String changeAdmin(User approver, User user, Group group) throws Exception {
         return whatsappRepository.changeAdmin(approver, user, group);
     }
-
-
-
 
 }

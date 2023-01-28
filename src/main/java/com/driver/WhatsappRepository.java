@@ -18,7 +18,7 @@ public class WhatsappRepository {
     private int messageId;
 
     // my HashMaps
-    private Map<String, User> userMap;
+    private HashMap<String, User> userMap;
 
     public WhatsappRepository() {
         this.groupMessageMap = new HashMap<Group, List<Message>>();
@@ -53,7 +53,7 @@ public class WhatsappRepository {
 //    }
 
 
-    public String createUser(String name, String mobNo) {
+    public String createUser(String name, String mobNo) throws Exception {
         userMap.put(mobNo, new User(name, mobNo));
         return "SUCCESS";
     }
@@ -67,19 +67,14 @@ public class WhatsappRepository {
 //    }
 
 
-    // creation of personalChat
-    public Group personalChatGroup(List<User> users) {
-        Group personalChat = new Group(users.get(1).getName(), 2);
-        groupUserMap.put(personalChat, users); // personal chat is also a group, hence putted into dataBase
-        return personalChat;
-    }
+
 
 
 
     // create a group
     public Group createGroup(List<User> users) {
         if(users.size() == 2) {
-            return personalChatGroup(users);
+            return this.personalChatGroup(users);
         }
 
         this.customGroupCount++;
@@ -91,9 +86,18 @@ public class WhatsappRepository {
     }
 
 
+    // creation of personalChat
+    public Group personalChatGroup(List<User> users) {
+        Group personalChat = new Group(users.get(1).getName(), 2);
+        groupUserMap.put(personalChat, users); // personal chat is also a group, hence putted into dataBase
+        return personalChat;
+    }
+
+
     // create a message
     public int createMessage(String messageContent) {
-        Message message = new Message(this.messageId++, messageContent, new Date());
+        this.messageId++;
+        Message message = new Message(messageId, messageContent, new Date());
         return this.messageId; // from which id message was created
     }
 
@@ -102,18 +106,20 @@ public class WhatsappRepository {
     // Send a message by providing the message, sender, and group.
     // means i have to send message in some group
     public int sendMessage(Message message, User sender, Group group) throws Exception{
-        if(!groupUserMap.containsKey(group.getName())) throw new Exception("Group does not exist");
+        if(!groupUserMap.containsKey(group)) throw new Exception("Group does not exist");
 
-        if(!checkSender(group, sender)) throw new Exception("You are not allowed to send message");
+        if(!this.checkSender(group, sender)) throw new Exception("You are not allowed to send message");
 
-        List<Message> messageList = groupMessageMap.get(group);
+        List<Message> messageList = new ArrayList<>();
+        if(groupMessageMap.containsKey(group)) messageList = groupMessageMap.get(group);
+
         messageList.add(message);
         groupMessageMap.put(group, messageList);  // also updated in DB
 
-        int messageListSize = groupMessageMap.get(group).size();
+//        int messageListSize = groupMessageMap.get(group).size();
 
-        // return messageList.size();
-        return messageListSize;
+         return messageList.size();
+//        return messageListSize;
     }
 
 
@@ -121,7 +127,7 @@ public class WhatsappRepository {
     public boolean checkSender(Group group, User sender) {
         List<User> userList = groupUserMap.get(group);
         for (User user : userList) {
-            if(userList.equals(sender))
+            if(user.equals(sender))
                 return true;
         }
         return false;
@@ -134,7 +140,7 @@ public class WhatsappRepository {
 
         if(!adminMap.get(group).equals(approver)) throw new Exception("Approver does not have rights");
 
-        if(!checkSender(group, user)) throw new Exception("User is not a participant");
+        if(!this.checkSender(group, user)) throw new Exception("User is not a participant");
 
         adminMap.put(group, user);
         return "SUCCESS";
