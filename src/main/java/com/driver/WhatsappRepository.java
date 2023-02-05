@@ -143,13 +143,18 @@ public class WhatsappRepository {
 //    }
 
 
-    public boolean checkNewUser(String mobile) {
-        if(userMap.containsKey(mobile)) return false;
-        return true;
-    }
+//    public boolean checkNewUser(String mobile) {
+//        if(userMap.containsKey(mobile)) return false;
+//        return true;
+//    }
 
-    public void createUser(String name, String mobile) {
-        userMap.put(mobile, new User(name, mobile));
+    public String createUser(String name, String mobile) throws Exception {
+        if(!userMap.containsKey(mobile))
+            userMap.put(mobile, new User(name, mobile));
+        else
+            throw new Exception("User already Exist");
+
+        return "SUCCESS";
     }
 
     public String changeAdmin(User approver, User user, Group group) throws Exception{
