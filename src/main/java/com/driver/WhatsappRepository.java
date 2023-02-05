@@ -143,11 +143,6 @@ public class WhatsappRepository {
 //    }
 
 
-//    public boolean checkNewUser(String mobile) {
-//        if(userMap.containsKey(mobile)) return false;
-//        return true;
-//    }
-
     public String createUser(String name, String mobile) throws Exception {
         if(!userMap.containsKey(mobile))
             userMap.put(mobile, new User(name, mobile));
@@ -157,23 +152,15 @@ public class WhatsappRepository {
         return "SUCCESS";
     }
 
-    public String changeAdmin(User approver, User user, Group group) throws Exception{
-        if(!groupUserMap.containsKey(group)) throw new Exception("Group does not exist");
-        if(!adminMap.get(group).equals(approver)) throw new Exception("Approver does not have rights");
-        if(!this.userExistsInGroup(group, user)) throw  new Exception("User is not a participant");
-
-        adminMap.put(group, user);
-        return "SUCCESS";
-    }
 
     public Group createGroup(List<User> users) {
-        if(users.size() == 2) return this.createPersonalChat(users);
+        if(users.size() == 2)  // so, this is a personal chat
+            return this.createPersonalChat(users);
 
         this.customGroupCount++;
-        String groupName = "Group " + this.customGroupCount;
-        Group group = new Group(groupName, users.size());
+        Group group = new Group("Group " + this.customGroupCount, users.size());
         groupUserMap.put(group, users);
-        adminMap.put(group, users.get(0));
+        adminMap.put(group, users.get(0)); // coz all users have unique name
         return group;
     }
 
@@ -184,15 +171,15 @@ public class WhatsappRepository {
         return personalGroup;
     }
 
-    public int createMessage(String content){
+    public int createMessage(String content) {
         this.messageId++;
         Message message = new Message(messageId, content, new Date());
         return this.messageId;
     }
 
-    public int sendMessage(Message message, User sender, Group group) throws Exception{
+    public int sendMessage(Message message, User sender, Group group) throws Exception {
         if(!groupUserMap.containsKey(group)) throw new Exception("Group does not exist");
-        if(!this.userExistsInGroup(group, sender)) throw  new Exception("You are not allowed to send message");
+        if(!this.checkUserExistsInGroup(group, sender)) throw  new Exception("You are not allowed to send message");
 
         List<Message> messages = new ArrayList<>();
         if(groupMessageMap.containsKey(group)) messages = groupMessageMap.get(group);
@@ -202,12 +189,24 @@ public class WhatsappRepository {
         return messages.size();
     }
 
-    public boolean userExistsInGroup(Group group, User sender) {
+    //Function to check if user exist in the group or not
+    public boolean checkUserExistsInGroup(Group group, User sender) {
         List<User> users = groupUserMap.get(group);
         for(User user: users) {
             if(user.equals(sender)) return true;
         }
 
         return false;
+    }
+
+
+    // Change Admin
+    public String changeAdmin(User approver, User user, Group group) throws Exception{
+        if(!groupUserMap.containsKey(group)) throw new Exception("Group does not exist");
+        if(!adminMap.get(group).equals(approver)) throw new Exception("Approver does not have rights");
+        if(!this.checkUserExistsInGroup(group, user)) throw  new Exception("User is not a participant");
+
+        adminMap.put(group, user); // user became the Admin now
+        return "SUCCESS";
     }
 }

@@ -11,10 +11,6 @@ public class WhatsappService {
     // common Object of repository class
     WhatsappRepository whatsappRepository = new WhatsappRepository();
 
-//    public boolean checkNewUser(String mobNo) {
-//        return whatsappRepository.checkNewUser(mobNo);
-//    }
-
     public String createUser(String name, String mobNo) throws Exception {
         return whatsappRepository.createUser(name, mobNo);
     }
